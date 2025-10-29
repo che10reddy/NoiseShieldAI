@@ -233,17 +233,6 @@ with tab_soil:
         st.progress(int(conf))
         st.write(f"🧠 Confidence: **{conf}%** · Baseline: {p_lr:.2f} · Var: {var:.4f}")
 
-        fig, ax = plt.subplots()
-        ax.bar([f"Sub{i+1}" for i in range(len(sub_probs))] + ["Final"], list(sub_probs) + [p_ens])
-        ax.set_ylim(0, 1)
-        ax.set_ylabel("Probability")
-        st.pyplot(fig)
-
-        expl = linear_contribs(soil_pipe, Xns, ["pH", "Nitrogen", "Phosphorus", "Potassium", "Moisture"])
-        st.markdown("**Why this result? (Feature contributions)**")
-        for f, c in expl:
-            st.write(f"- {f}: {c:+.3f}")
-
         st.session_state["last_stable"] = {
             "mode": "Soil",
             "X": [float(v) for v in X0s.ravel()],
@@ -253,21 +242,10 @@ with tab_soil:
             "time": dt.datetime.now().isoformat(),
         }
 
-        st.markdown("**Noise Robustness (probability vs noise):**")
-        levels = [0, 25, 50, 75, 100]
-        base_p, ens_p = robustness_curve(soil_pipe, subs_s, X0s, levels)
-        fig2, ax2 = plt.subplots()
-        ax2.plot(levels, base_p, marker="o", label="Baseline (LR)")
-        ax2.plot(levels, ens_p, marker="o", label="Interference Ensemble")
-        ax2.set_xlabel("Noise (%)")
-        ax2.set_ylabel("Positive Probability")
-        ax2.set_ylim(0, 1)
-        ax2.legend()
-        st.pyplot(fig2)
-
 # ---- HEALTH TAB ----
 with tab_health:
     st.subheader("🧬 Health Diagnostics (Offline)")
+
     col1, col2 = st.columns(2)
     with col1:
         hb = st.number_input("Hemoglobin (g/dL)", 0.0, 25.0, 12.5)
@@ -276,23 +254,35 @@ with tab_health:
     with col2:
         temp = st.number_input("Body Temp (°C)", 30.0, 45.0, 36.8)
         pulse = st.number_input("Pulse Rate (bpm)", 30.0, 200.0, 80.0)
+
     X0 = np.array([[hb, wbc, pltlt, temp, pulse]])
     Xn = inject_noise(X0, noise_pct)
 
     if st.button("Run Health Analysis"):
-        p_lr = health_pipe.predict_proba(Xn)[0,1]
+        p_lr = health_pipe.predict_proba(Xn)[0, 1]
         subs_h = make_submodels_from(health_pipe, eps=0.04)
         p_ens, sub_probs, weights, var = ensemble_predict_proba(subs_h, Xn)
         y_pred = int(p_ens >= 0.5)
-        label = "Possible Condition" if y_pred==1 else "Healthy"
+        label = "Possible Condition" if y_pred == 1 else "Healthy"
+
         st.markdown(f"**Predicted Result:** {label}")
         conf = round(p_ens * 100, 2)
         st.progress(int(conf))
         st.write(f"🧠 Confidence: **{conf}%** · Baseline: {p_lr:.2f} · Var: {var:.4f}")
 
+        st.session_state["last_stable"] = {
+            "mode": "Health",
+            "X": [float(v) for v in X0.ravel()],
+            "prob": float(p_ens),
+            "confidence": float(conf),
+            "noise_pct": int(noise_pct),
+            "time": dt.datetime.now().isoformat(),
+        }
+        
 # ---- WATER TAB ----
 with tab_water:
     st.subheader("💧 Water Quality (Offline)")
+
     col1, col2 = st.columns(2)
     with col1:
         ph = st.number_input("pH", 0.0, 14.0, 7.2)
@@ -301,20 +291,31 @@ with tab_water:
     with col2:
         ec = st.number_input("EC (µS/cm)", 0.0, 10000.0, 600.0)
         wtemp = st.number_input("Water Temp (°C)", 0.0, 60.0, 25.0)
+
     X0w = np.array([[ph, turb, tds, ec, wtemp]])
     Xnw = inject_noise(X0w, noise_pct)
 
     if st.button("Run Water Analysis"):
-        p_lr = water_pipe.predict_proba(Xnw)[0,1]
+        p_lr = water_pipe.predict_proba(Xnw)[0, 1]
         subs_w = make_submodels_from(water_pipe, eps=0.04)
         p_ens, sub_probs, weights, var = ensemble_predict_proba(subs_w, Xnw)
         y_pred = int(p_ens >= 0.5)
-        label = "Contaminated" if y_pred==1 else "Safe"
+        label = "Contaminated" if y_pred == 1 else "Safe"
+
         st.markdown(f"**Predicted Result:** {label}")
         conf = round(p_ens * 100, 2)
         st.progress(int(conf))
         st.write(f"🧠 Confidence: **{conf}%** · Baseline: {p_lr:.2f} · Var: {var:.4f}")
 
+        st.session_state["last_stable"] = {
+            "mode": "Water",
+            "X": [float(v) for v in X0w.ravel()],
+            "prob": float(p_ens),
+            "confidence": float(conf),
+            "noise_pct": int(noise_pct),
+            "time": dt.datetime.now().isoformat(),
+        }
+        
 # ---- QUANTUM VIEW ----
 with tab_quantum:
     st.subheader("⚛ Quantum-Inspired View")
