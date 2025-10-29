@@ -346,6 +346,9 @@ with tab_dashboard:
     overall = round((soil_conf + health_conf + water_conf) / 3, 1)
     st.markdown(f"### 🌍 Overall Sustainability Confidence: **{overall}%**")
 
+    update_time = st.session_state.get("last_update_time", "No tests yet")
+    st.markdown(f"🕒 **Last Update:** {update_time}")
+
     st.caption(
         "NoiseShield AI — Quantum-inspired, offline diagnostics supporting SDGs 2, 3, and 6 in low-resource settings."
     )
