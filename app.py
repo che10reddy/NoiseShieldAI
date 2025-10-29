@@ -9,14 +9,27 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="NoiseShield AI", page_icon="🔰", layout="centered")
 
 # ---------- THEME & BANNER ----------
-mode = st.sidebar.radio("Theme", ["🌞 Light", "🌙 Dark"], index=1)
-bg_color = "#0e1117" if "Dark" in mode else "#FFFFFF"
-text_color = "#FAFAFA" if "Dark" in mode else "#000000"
-accent = "#00B4B4" if "Dark" in mode else "#0077CC"
+
+if "theme_mode" not in st.session_state:
+    st.session_state["theme_mode"] = "🌞 Light"
+
+theme_choice = st.sidebar.radio("Theme", ["🌞 Light", "🌙 Dark"],
+                                index=0 if "Light" in st.session_state["theme_mode"] else 1)
+st.session_state["theme_mode"] = theme_choice
+
+is_dark = "Dark" in st.session_state["theme_mode"]
+bg_color = "#0E1117" if is_dark else "#FFFFFF"
+text_color = "#FAFAFA" if is_dark else "#000000"
+accent = "#00B4B4" if is_dark else "#0077CC"
+banner_color = "#00B4B4" if is_dark else "#0077CC"
 
 st.markdown(f"""
     <style>
         body {{
+            background-color: {bg_color};
+            color: {text_color};
+        }}
+        .stApp {{
             background-color: {bg_color};
             color: {text_color};
         }}
@@ -26,28 +39,44 @@ st.markdown(f"""
             border-radius: 8px;
             font-weight: 600;
         }}
-        .stProgress .st-bo {{
-            background-color: {accent};
+        .stProgress > div > div {{
+            background-color: {accent} !important;
         }}
         .block-container {{
             padding-top: 1.5rem;
             padding-bottom: 1rem;
             max-width: 900px;
         }}
+        h2, h3, h4, h5 {{
+            color: {banner_color};
+        }}
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
+<style>
+* {
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ---- SDG Banner ----
+st.markdown(f"""
 <div style='text-align:center; margin-bottom:20px'>
-  <h2 style='font-weight:700; color:#00B4B4;'>🌍 NoiseShield AI | Quantum-Inspired Diagnostics</h2>
-  <p style='font-size:15px; margin-top:-10px'>
+  <h2 style='font-weight:700; color:{banner_color};'>
+    🌍 NoiseShield AI | Quantum-Inspired Diagnostics
+  </h2>
+  <p style='font-size:15px; margin-top:-10px; color:{text_color};'>
     Supporting <strong>SDG 2 (Zero Hunger)</strong>, 
     <strong>SDG 3 (Good Health and Well-Being)</strong>, and 
     <strong>SDG 6 (Clean Water and Sanitation)</strong>
   </p>
-  <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Sustainable_Development_Goal_2.svg/120px-Sustainable_Development_Goal_2.svg.png' width='50' style='margin:4px'/>
-  <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Sustainable_Development_Goal_3.svg/120px-Sustainable_Development_Goal_3.svg.png' width='50' style='margin:4px'/>
-  <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Sustainable_Development_Goal_6.svg/120px-Sustainable_Development_Goal_6.svg.png' width='50' style='margin:4px'/>
+  <div style='margin-top:6px;'>
+    <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Sustainable_Development_Goal_2.svg/120px-Sustainable_Development_Goal_2.svg.png' width='55' style='margin:4px'/>
+    <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Sustainable_Development_Goal_3.svg/120px-Sustainable_Development_Goal_3.svg.png' width='55' style='margin:4px'/>
+    <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Sustainable_Development_Goal_6.svg/120px-Sustainable_Development_Goal_6.svg.png' width='55' style='margin:4px'/>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
