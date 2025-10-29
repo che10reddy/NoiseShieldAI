@@ -298,7 +298,10 @@ with tab_report:
 with tab_dashboard:
     st.subheader("📊 SDG Dashboard Summary")
 
-    last = st.session_state.get("last_stable") or {}
+    if "last_stable" not in st.session_state or not isinstance(st.session_state["last_stable"], dict):
+        st.session_state["last_stable"] = {}
+
+    last = st.session_state["last_stable"]
     mode = last.get("mode", "")
     conf_val = last.get("confidence", 0)
 
@@ -314,6 +317,10 @@ with tab_dashboard:
     col1.metric("🌾 Soil Fertility Index (SDG 2)", f"{int(soil_conf)}%")
     col2.metric("🧬 Health Reliability (SDG 3)", f"{int(health_conf)}%")
     col3.metric("💧 Water Purity Confidence (SDG 6)", f"{int(water_conf)}%")
-    overall = round((soil_conf + health_conf + water_conf)/3, 1)
+
+    overall = round((soil_conf + health_conf + water_conf) / 3, 1)
     st.markdown(f"### 🌍 Overall Sustainability Confidence: **{overall}%**")
-    st.caption("NoiseShield AI — a quantum-inspired, offline diagnostic tool for food, health & water security.")
+
+    st.caption(
+        "NoiseShield AI — a quantum-inspired, offline diagnostic tool for food, health, and water security."
+    )
