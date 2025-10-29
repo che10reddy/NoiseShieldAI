@@ -297,17 +297,23 @@ with tab_report:
 # ---- DASHBOARD ----
 with tab_dashboard:
     st.subheader("📊 SDG Dashboard Summary")
-    soil_conf, health_conf, water_conf = 0, 0, 0
+
     last = st.session_state.get("last_stable") or {}
     mode = last.get("mode", "")
     conf_val = last.get("confidence", 0)
-    if mode == "Soil": soil_conf = conf_val
-    elif mode == "Health": health_conf = conf_val
-    elif mode == "Water": water_conf = conf_val
-    c1, c2, c3 = st.columns(3)
-    with c1: st.metric("Soil Fertility Index (SDG 2)", f"{int(soil_conf)}%")
-    with c2: st.metric("Health Reliability (SDG 3)", f"{int(health_conf)}%")
-    with c3: st.metric("Water Purity (SDG 6)", f"{int(water_conf)}%")
+
+    soil_conf = health_conf = water_conf = 0
+    if mode == "Soil":
+        soil_conf = conf_val
+    elif mode == "Health":
+        health_conf = conf_val
+    elif mode == "Water":
+        water_conf = conf_val
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("🌾 Soil Fertility Index (SDG 2)", f"{int(soil_conf)}%")
+    col2.metric("🧬 Health Reliability (SDG 3)", f"{int(health_conf)}%")
+    col3.metric("💧 Water Purity Confidence (SDG 6)", f"{int(water_conf)}%")
     overall = round((soil_conf + health_conf + water_conf)/3, 1)
     st.markdown(f"### 🌍 Overall Sustainability Confidence: **{overall}%**")
     st.caption("NoiseShield AI — a quantum-inspired, offline diagnostic tool for food, health & water security.")
