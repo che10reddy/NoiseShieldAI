@@ -352,7 +352,7 @@ with tab_dashboard:
         st.session_state["prev_mode"] = mode
     elif mode != st.session_state["prev_mode"]:
         st.session_state["prev_mode"] = mode
-        st.experimental_rerun()  
+        st.rerun()  
 
     overall = round((soil_conf + health_conf + water_conf) / 3, 1)
 
