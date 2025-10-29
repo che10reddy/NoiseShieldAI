@@ -11,7 +11,7 @@ st.set_page_config(page_title="NoiseShield AI", page_icon="🔰", layout="center
 # ---------- THEME & BANNER ----------
 
 if "theme_mode" not in st.session_state:
-    st.session_state["theme_mode"] = "🌞 Light"
+    st.session_state["theme_mode"] = "🌙 Dark"
 
 theme_choice = st.sidebar.radio("Theme", ["🌞 Light", "🌙 Dark"],
                                 index=0 if "Light" in st.session_state["theme_mode"] else 1)
