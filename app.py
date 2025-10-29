@@ -297,30 +297,55 @@ with tab_report:
 # ---- DASHBOARD ----
 with tab_dashboard:
     st.subheader("📊 SDG Dashboard Summary")
-
+    if "history" not in st.session_state:
+        st.session_state["history"] = {"Soil": [], "Health": [], "Water": []}
     if "last_stable" not in st.session_state or not isinstance(st.session_state["last_stable"], dict):
         st.session_state["last_stable"] = {}
 
     last = st.session_state["last_stable"]
     mode = last.get("mode", "")
-    conf_val = last.get("confidence", 0)
+    conf_val = last.get("confidence", None)
+    if mode in ["Soil", "Health", "Water"] and conf_val is not None:
+        history = st.session_state["history"][mode]
+        history.append(conf_val)
+        if len(history) > 3:  
+            history.pop(0)
+        st.session_state["history"][mode] = history
 
-    soil_conf = health_conf = water_conf = 0
-    if mode == "Soil":
-        soil_conf = conf_val
-    elif mode == "Health":
-        health_conf = conf_val
-    elif mode == "Water":
-        water_conf = conf_val
+    soil_conf = np.mean(st.session_state["history"]["Soil"]) if st.session_state["history"]["Soil"] else 0
+    health_conf = np.mean(st.session_state["history"]["Health"]) if st.session_state["history"]["Health"] else 0
+    water_conf = np.mean(st.session_state["history"]["Water"]) if st.session_state["history"]["Water"] else 0
 
     col1, col2, col3 = st.columns(3)
-    col1.metric("🌾 Soil Fertility Index (SDG 2)", f"{int(soil_conf)}%")
-    col2.metric("🧬 Health Reliability (SDG 3)", f"{int(health_conf)}%")
-    col3.metric("💧 Water Purity Confidence (SDG 6)", f"{int(water_conf)}%")
+    col1.metric("🌾 Soil Fertility Index (SDG 2)", f"{soil_conf:.1f}%")
+    col2.metric("🧬 Health Reliability (SDG 3)", f"{health_conf:.1f}%")
+    col3.metric("💧 Water Purity Confidence (SDG 6)", f"{water_conf:.1f}%")
+
+    st.markdown("### 🔄 Confidence Trends (Last 3 Tests)")
+    fig, ax = plt.subplots()
+    ax.plot(st.session_state["history"]["Soil"], "o-", label="Soil")
+    ax.plot(st.session_state["history"]["Health"], "o-", label="Health")
+    ax.plot(st.session_state["history"]["Water"], "o-", label="Water")
+    ax.set_ylim(0, 100)
+    ax.set_ylabel("Confidence (%)")
+    ax.set_xlabel("Last 3 Tests")
+    ax.legend()
+    st.pyplot(fig)
+
+    goal = 80
+    st.markdown("### 🎯 Progress Toward UN SDG Goals")
+    st.progress(int(min(soil_conf / goal, 1) * 100))
+    st.caption(f"🌾 Soil Fertility Goal: {soil_conf:.1f}% of {goal}% target")
+
+    st.progress(int(min(health_conf / goal, 1) * 100))
+    st.caption(f"🧬 Health Reliability Goal: {health_conf:.1f}% of {goal}% target")
+
+    st.progress(int(min(water_conf / goal, 1) * 100))
+    st.caption(f"💧 Water Purity Goal: {water_conf:.1f}% of {goal}% target")
 
     overall = round((soil_conf + health_conf + water_conf) / 3, 1)
     st.markdown(f"### 🌍 Overall Sustainability Confidence: **{overall}%**")
 
     st.caption(
-        "NoiseShield AI — a quantum-inspired, offline diagnostic tool for food, health, and water security."
+        "NoiseShield AI — Quantum-inspired, offline diagnostics supporting SDGs 2, 3, and 6 in low-resource settings."
     )
