@@ -269,8 +269,9 @@ with tab_report:
 with tab_dashboard:
     st.subheader("📊 SDG Dashboard Summary")
     soil_conf, health_conf, water_conf = 0, 0, 0
-    mode = st.session_state.get("last_stable", {}).get("mode", "")
-    conf_val = st.session_state.get("last_stable", {}).get("confidence", 0)
+    last = st.session_state.get("last_stable") or {}
+    mode = last.get("mode", "")
+    conf_val = last.get("confidence", 0)
     if mode == "Soil": soil_conf = conf_val
     elif mode == "Health": health_conf = conf_val
     elif mode == "Water": water_conf = conf_val
