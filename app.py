@@ -191,6 +191,7 @@ if "last_stable" not in st.session_state:
 # ---- SOIL TAB ----
 with tab_soil:
     st.subheader("🌾 Soil Fertility Analysis (Offline)")
+
     col1, col2 = st.columns(2)
     with col1:
         spH = st.number_input("Soil pH", 3.0, 10.0, 6.5)
@@ -199,11 +200,14 @@ with tab_soil:
     with col2:
         K = st.number_input("Potassium (mg/kg)", 0.0, 300.0, 120.0)
         moist = st.number_input("Soil Moisture (%)", 0.0, 100.0, 25.0)
+
     X0s = np.array([[spH, N, P, K, moist]])
     Xns = inject_noise(X0s, noise_pct)
+
     @st.cache_resource
     def train_soil_baseline():
-        rng = seed_rng(3); n = 400
+        rng = seed_rng(3)
+        n = 400
         pH = rng.normal(6.5, 0.8, n).clip(3.5, 9.5)
         N = rng.normal(50, 25, n).clip(0, 200)
         P = rng.normal(40, 20, n).clip(0, 200)
@@ -212,25 +216,54 @@ with tab_soil:
         X = np.column_stack([pH, N, P, K, M])
         y = ((N < 30) | (P < 20) | (K < 80) | (pH < 5.5) | (pH > 8.5)).astype(int)
         pipe = make_pipeline(StandardScaler(), LogisticRegression(max_iter=500))
-        pipe.fit(X, y); return pipe
+        pipe.fit(X, y)
+        return pipe
+
     soil_pipe = train_soil_baseline()
 
     if st.button("Run Soil Analysis"):
-        p_lr = soil_pipe.predict_proba(Xns)[0,1]
+        p_lr = soil_pipe.predict_proba(Xns)[0, 1]
         subs_s = make_submodels_from(soil_pipe, eps=0.04)
         p_ens, sub_probs, weights, var = ensemble_predict_proba(subs_s, Xns)
         y_pred = int(p_ens >= 0.5)
-        label = "Nutrient Deficient" if y_pred==1 else "Fertile"
+        label = "Nutrient Deficient" if y_pred == 1 else "Fertile"
+
         st.markdown(f"**Predicted Result:** {label}")
         conf = round(p_ens * 100, 2)
         st.progress(int(conf))
         st.write(f"🧠 Confidence: **{conf}%** · Baseline: {p_lr:.2f} · Var: {var:.4f}")
+
         fig, ax = plt.subplots()
-        ax.bar([f"Sub{i+1}" for i in range(len(sub_probs))] + ["Final"], list(sub_probs)+[p_ens])
-        ax.set_ylim(0,1); st.pyplot(fig)
-        expl = linear_contribs(soil_pipe, Xns, ["pH","Nitrogen","Phosphorus","Potassium","Moisture"])
-        st.markdown("**Why this result?**")
-        for f, c in expl: st.write(f"- {f}: {c:+.3f}")
+        ax.bar([f"Sub{i+1}" for i in range(len(sub_probs))] + ["Final"], list(sub_probs) + [p_ens])
+        ax.set_ylim(0, 1)
+        ax.set_ylabel("Probability")
+        st.pyplot(fig)
+
+        expl = linear_contribs(soil_pipe, Xns, ["pH", "Nitrogen", "Phosphorus", "Potassium", "Moisture"])
+        st.markdown("**Why this result? (Feature contributions)**")
+        for f, c in expl:
+            st.write(f"- {f}: {c:+.3f}")
+
+        st.session_state["last_stable"] = {
+            "mode": "Soil",
+            "X": [float(v) for v in X0s.ravel()],
+            "prob": float(p_ens),
+            "confidence": float(conf),
+            "noise_pct": int(noise_pct),
+            "time": dt.datetime.now().isoformat(),
+        }
+
+        st.markdown("**Noise Robustness (probability vs noise):**")
+        levels = [0, 25, 50, 75, 100]
+        base_p, ens_p = robustness_curve(soil_pipe, subs_s, X0s, levels)
+        fig2, ax2 = plt.subplots()
+        ax2.plot(levels, base_p, marker="o", label="Baseline (LR)")
+        ax2.plot(levels, ens_p, marker="o", label="Interference Ensemble")
+        ax2.set_xlabel("Noise (%)")
+        ax2.set_ylabel("Positive Probability")
+        ax2.set_ylim(0, 1)
+        ax2.legend()
+        st.pyplot(fig2)
 
 # ---- HEALTH TAB ----
 with tab_health:
