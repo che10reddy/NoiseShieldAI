@@ -1,3 +1,5 @@
+import os
+os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
 import streamlit as st
 import numpy as np, pandas as pd, datetime as dt
 from io import StringIO
