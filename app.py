@@ -1,10 +1,4 @@
-# =========================
-# NoiseShield AI · Quantum-Inspired Diagnostics
-# Optimized for Streamlit Cloud / Codespaces / Ubuntu
-# =========================
-
 import os
-# 🔧 Disable directory watchers to prevent "inotify watch limit reached" error
 os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
 
 import streamlit as st
@@ -58,7 +52,7 @@ label, .stTextInput label, .stNumberInput label {{ color: {'#EDEDED' if is_dark 
 </style>
 """, unsafe_allow_html=True)
 
-# ========== Language Dictionary (English only shown for brevity) ==========
+# ========== Language Dictionary ==========
 L = {
     "title": "NoiseShield AI · Quantum-Inspired Diagnostics",
     "tabs": ["Soil", "Health", "Water", "Quantum View", "Reports", "Dashboard", "Cross-Domain Stability"],
@@ -78,7 +72,6 @@ L = {
     "overall": "Overall Sustainability Confidence",
     "excellent": "🟢 Excellent", "moderate": "🟡 Moderate", "needs": "🔴 Needs Work",
     "trend": "Confidence Trends", "caption": "Quantum-inspired, offline diagnostics tool.",
-    "note_panel": "Designed for YCS & College Admissions: explainable, robust, and offline."
 }
 
 # ========== Banner ==========
