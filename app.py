@@ -6,7 +6,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 import matplotlib.pyplot as plt
 
-# Optional PDF report (kept very lightweight & offline)
 try:
     from fpdf import FPDF
     HAS_FPDF = True
