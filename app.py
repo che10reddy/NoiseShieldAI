@@ -449,7 +449,6 @@ with tabs[3]:
     st.write("• Multiple submodels ≈ amplitude paths.")
     st.write("• High disagreement → equalized weights → destructive interference.")
     st.write("• Agreement → constructive reinforcement → stability.")
-    st.markdown(f"<div class='panel'>{L['note_panel']}</div>",unsafe_allow_html=True)
 
 
 # ---------- Reports ----------
