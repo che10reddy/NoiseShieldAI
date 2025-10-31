@@ -55,7 +55,7 @@ body,.stApp{{background:{bg};color:{txt};}}
 
 
 # ---------- Language ----------
-L = {
+LANG = {
     "English": {
         "title": "NoiseShield AI · Quantum-Inspired Diagnostics",
         "sdg2": "SDG 2 · Zero Hunger",
